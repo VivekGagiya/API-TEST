@@ -2,13 +2,13 @@ const express = require('express');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const validator = require('validator');
-// const path = require('path'); // Import 'path' module
+const path = require('path'); // Import 'path' module
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Serve static files (HTML, CSS, JS)
-// app.use(express.static(path.join(__dirname, 'public')));
+ Serve static files (HTML, CSS, JS)
+ app.use(express.static(path.join(__dirname, 'public')));
 
 // MySQL database connection setup
 const db = mysql.createConnection({
@@ -81,9 +81,9 @@ app.get('/get-all-data', (req, res) => {
   });
 });
 
-// app.get('/', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'public', 'index.html'));
-// });
+ app.get('/', (req, res) => {
+   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+ });
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
