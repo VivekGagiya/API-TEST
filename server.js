@@ -2,44 +2,44 @@ const express = require('express');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const validator = require('validator');
-const path = require('path'); // Import 'path' module
 
 const app = express();
 const port = process.env.PORT || 3000;
 
- Serve static files (HTML, CSS, JS)
- app.use(express.static(path.join(__dirname, 'public')));
-
-// MySQL database connection setup
-const db = mysql.createConnection({
-  host: '68.178.145.87', // Replace with the IP address of your PHPMyAdmin-hosted MySQL server
-  user: 'schbangnftdbuser',
-  password: 'schbangnftdbuserpassword',
-  database: 'schbangnftdb',
-});
-
-db.connect((err) => {
-  if (err) {
-    console.error('Error connecting to MySQL:', err);
-  } else {
-    console.log('Connected to MySQL');
-  }
-});
-
 // Middleware for parsing JSON requests
 app.use(bodyParser.json());
 
+// Function to create a MySQL connection
+function createDBConnection() {
+  return mysql.createConnection({
+    host: '68.178.145.87', // Replace with the IP address of your MySQL server
+    user: 'schbangnftdbuser',
+    password: 'schbangnftdbuserpassword',
+    database: 'schbangnftdb',
+  });
+}
+
 // Function to read all data from a table
 function readAllDataFromTable(tableName, callback) {
+  const db = createDBConnection();
+
   const sql = `SELECT * FROM ${tableName}`;
 
-  db.query(sql, (err, results) => {
+  db.connect((err) => {
     if (err) {
-      console.error('SQL error:', err);
+      console.error('Error connecting to MySQL:', err);
       return callback(err, null);
     }
 
-    return callback(null, results);
+    db.query(sql, (err, results) => {
+      db.end(); // Close the database connection
+      if (err) {
+        console.error('SQL error:', err);
+        return callback(err, null);
+      }
+
+      return callback(null, results);
+    });
   });
 }
 
@@ -52,19 +52,29 @@ app.post('/check-email', (req, res) => {
     return res.status(400).json({ message: 'Invalid email format' });
   }
 
+  const db = createDBConnection();
+
   // SQL injection prevention using parameterized queries
   const sql = 'SELECT * FROM users WHERE email = ?';
-  db.query(sql, [email], (err, results) => {
+  db.connect((err) => {
     if (err) {
-      console.error('SQL error:', err);
+      console.error('Error connecting to MySQL:', err);
       return res.status(500).json({ message: 'Internal server error' });
     }
 
-    if (results.length > 0) {
-      return res.json({ message: 'Email exists', emailExists: true });
-    } else {
-      return res.json({ message: 'Email does not exist', emailExists: false });
-    }
+    db.query(sql, [email], (err, results) => {
+      db.end(); // Close the database connection
+      if (err) {
+        console.error('SQL error:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+
+      if (results.length > 0) {
+        return res.json({ message: 'Email exists', emailExists: true });
+      } else {
+        return res.json({ message: 'Email does not exist', emailExists: false });
+      }
+    });
   });
 });
 
@@ -81,9 +91,46 @@ app.get('/get-all-data', (req, res) => {
   });
 });
 
- app.get('/', (req, res) => {
-   res.sendFile(path.join(__dirname, 'public', 'index.html'));
- });
+// API endpoint for user registration
+app.post('/register-user', (req, res) => {
+  const { name, email, department } = req.body;
+
+  // Validation: Check if any of the fields are null or empty
+  if (!name || !email || !department) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  // Validation: Check if the name contains only alphabets
+  if (!/^[a-zA-Z]+$/.test(name)) {
+    return res.status(400).json({ message: 'Name should contain only alphabets' });
+  }
+
+  // Validation: Check if email is in the proper format
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ message: 'Invalid email format' });
+  }
+
+  const db = createDBConnection();
+
+  // SQL injection prevention using parameterized queries
+  const sql = 'INSERT INTO users (name, email, department) VALUES (?, ?, ?)';
+  db.connect((err) => {
+    if (err) {
+      console.error('Error connecting to MySQL:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+
+    db.query(sql, [name, email, department], (err, results) => {
+      db.end(); // Close the database connection
+      if (err) {
+        console.error('SQL error:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+
+      return res.json({ message: 'User registered successfully' });
+    });
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
