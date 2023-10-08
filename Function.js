@@ -1,31 +1,48 @@
- const loginForm = document.getElementById('login-form');
-  const loginEmailInput = document.getElementById('login-email');
-  const loginError = document.getElementById('login-error');
+// Function to check email existence
+function checkEmailExistence(email) {
+  return fetch('/check-email', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data; // Contains the response from the API
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+}
 
-  loginForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
+// Function to get all data from a table
+function getAllDataFromTable() {
+  return fetch('/get-all-data')
+    .then((response) => response.json())
+    .then((data) => {
+      return data; // Contains the response from the API
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+}
 
-    const email = loginEmailInput.value;
-
-    try {
-      const response = await fetch('/check-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      if (response.status === 200) {
-        // Email exists, you can proceed with login logic here
-        // For example, redirect to the profile page
-        window.location.href = "./profile.html";
-      } else {
-        // Email does not exist, display an error message
-        loginError.textContent = 'Email does not exist';
-      }
-    } catch (error) {
-      console.error('Error checking email:', error);
-      loginError.textContent = 'An error occurred while checking email';
-    }
-  });
+// Function to register a user
+function registerUser(name, email, department) {
+  const userData = { name, email, department };
+  return fetch('/register-user', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userData),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data; // Contains the response from the API
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+}
