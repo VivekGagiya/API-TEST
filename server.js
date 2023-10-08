@@ -2,12 +2,18 @@ const express = require('express');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const validator = require('validator');
+const cors = require('cors'); 
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware for parsing JSON requests
 app.use(bodyParser.json());
+app.use(cors());
+
+let corsOptions = {
+  origin: ['http://localhost:3000']
+};
 
 // Function to create a MySQL connection
 function createDBConnection() {
@@ -44,7 +50,7 @@ function readAllDataFromTable(tableName, callback) {
 }
 
 // API endpoint for checking email existence
-app.post('/check-email', (req, res) => {
+app.post('/check-email', cors(corsOptions), (req, res) => {
   const { email } = req.body;
 
   // Validation: Check if email is not empty and is in the proper format
@@ -79,7 +85,7 @@ app.post('/check-email', (req, res) => {
 });
 
 // API endpoint for getting all data from a table
-app.get('/get-all-data', (req, res) => {
+app.get('/get-all-data',cors(corsOptions), (req, res) => {
   const tableName = 'nft_json_records'; // Replace with the actual table name
 
   readAllDataFromTable(tableName, (err, data) => {
@@ -92,7 +98,7 @@ app.get('/get-all-data', (req, res) => {
 });
 
 // API endpoint for user registration
-app.post('/register-user', (req, res) => {
+app.post('/register-user',cors(corsOptions), (req, res) => {
   const { name, email, department } = req.body;
 
   // Validation: Check if any of the fields are null or empty
