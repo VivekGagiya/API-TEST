@@ -52,6 +52,11 @@ app.post('/check-email', (req, res) => {
     return res.status(400).json({ message: 'Invalid email format' });
   }
 
+  // Additional Validation: Check if the email domain is "schbang.com"
+  if (!email.endsWith('@schbang.com')) {
+    return res.status(400).json({ message: 'Email must have a domain of "schbang.com"' });
+  }
+
   const db = createDBConnection();
 
   // SQL injection prevention using parameterized queries
@@ -108,6 +113,11 @@ app.post('/register-user', (req, res) => {
   // Validation: Check if email is in the proper format
   if (!validator.isEmail(email)) {
     return res.status(400).json({ message: 'Invalid email format' });
+  }
+
+  // Additional Validation: Check if the email domain is "schbang.com"
+  if (!email.endsWith('@schbang.com')) {
+    return res.status(400).json({ message: 'Email must have a domain of "schbang.com"' });
   }
 
   const db = createDBConnection();
