@@ -7,7 +7,7 @@ const path = require('path'); // Import 'path' module
 const app = express();
 const port = process.env.PORT || 3000;
 
- Serve static files (HTML, CSS, JS)
+//  Serve static files (HTML, CSS, JS)
  app.use(express.static(path.join(__dirname, 'public')));
 
 // MySQL database connection setup
