@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 
 // Ethereum provider setup
 const provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.maticvigil.com/');
-const privateKey = '755467513f6048b06826196ebe875d2136a4ac9b20dea45c7e7aeab94de7a954'; // Replace with private key
+const privateKey = '755467513f6048b06826196ebe875d2136a4ac9b20dea45c7e7aeab94de7a954'; // Replace with your private key
 const wallet = new ethers.Wallet(privateKey, provider);
 
 // Smart contract setup
@@ -547,214 +547,260 @@ app.use(bodyParser.json());
 
 // Function to create a MySQL connection
 function createDBConnection() {
-  return mysql.createConnection({
-    host: '68.178.145.87', // Replace with the IP address of your MySQL server
-    user: 'schbangnftdbuser',
-    password: 'schbangnftdbuserpassword',
-    database: 'schbangnftdb',
-  });
+	return mysql.createConnection({
+		host: '68.178.145.87', // Replace with the IP address of your MySQL server
+		user: 'schbangnftdbuser',
+		password: 'schbangnftdbuserpassword',
+		database: 'schbangnftdb',
+	});
 }
 
 // API endpoint for checking email existence
 app.post('/check-email', (req, res) => {
-  const { email } = req.body;
-  console.log(email);
+	const { email } = req.body;
+	console.log(email);
 
-  // Validation: Check if email is not empty and is in the proper format
-  if (!email || !validator.isEmail(email)) {
-    return res.status(400).json({ message: 'Invalid email format' });
-  }
+	// Validation: Check if email is not empty and is in the proper format
+	if (!email || !validator.isEmail(email)) {
+		return res.status(400).json({ message: 'Invalid email format' });
+	}
 
-  // Additional Validation: Check if the email domain is "schbang.com"
-  if (!email.endsWith('@schbang.com')) {
-    return res.status(400).json({ message: 'Email must have a domain of "schbang.com"' });
-  }
+	// Additional Validation: Check if the email domain is "schbang.com"
+	if (!email.endsWith('@schbang.com')) {
+		return res.status(400).json({ message: 'Email must have a domain of "schbang.com"' });
+	}
 
-  const db = createDBConnection();
+	const db = createDBConnection();
 
-  // SQL injection prevention using parameterized queries
-  const sql = 'SELECT * FROM users WHERE email = ?';
-  db.connect((err) => {
-    if (err) {
-      console.error('Error connecting to MySQL:', err);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
+	// SQL injection prevention using parameterized queries
+	const sql = 'SELECT * FROM users WHERE email = ?';
+	db.connect((err) => {
+		if (err) {
+			console.error('Error connecting to MySQL:', err);
+			return res.status(500).json({ message: 'Internal server error' });
+		}
 
-    db.query(sql, [email], (err, results) => {
-      db.end(); // Close the database connection
-      if (err) {
-        console.error('SQL error:', err);
-        return res.status(500).json({ message: 'Internal server error' });
-      }
+		db.query(sql, [email], (err, results) => {
+			db.end(); // Close the database connection
+			if (err) {
+				console.error('SQL error:', err);
+				return res.status(500).json({ message: 'Internal server error' });
+			}
 
-      if (results.length > 0) {
-        return res.json({ message: 'Email exists', emailExists: true });
-      } else {
-        return res.json({ message: 'Email does not exist', emailExists: false });
-      }
-    });
-  });
+			if (results.length > 0) {
+				return res.json({ message: 'Email exists', emailExists: true });
+			} else {
+				return res.json({ message: 'Email does not exist', emailExists: false });
+			}
+		});
+	});
 });
 
 // API endpoint for user registration
 app.post('/register-user', (req, res) => {
-  const { name, email, department } = req.body;
-
-  // Validation: Check if any of the fields are null or empty
-  if (!name || !email || !department) {
-    return res.status(400).json({ message: 'All fields are required' });
-  }
-
-  // Validation: Check if the name contains only alphabets
-  if (!/^[a-zA-Z]+$/.test(name)) {
-    return res.status(400).json({ message: 'Name should contain only alphabets' });
-  }
-
-  // Validation: Check if email is in the proper format
-  if (!validator.isEmail(email)) {
-    return res.status(400).json({ message: 'Invalid email format' });
-  }
-
-  // Additional Validation: Check if the email domain is "schbang.com"
-  if (!email.endsWith('@schbang.com')) {
-    return res.status(400).json({ message: 'Email must have a domain of "schbang.com"' });
-  }
-
-  const db = createDBConnection();
-
-  // SQL injection prevention using parameterized queries
-  const sql = 'INSERT INTO users (name, email, department) VALUES (?, ?, ?)';
-  db.connect((err) => {
-    if (err) {
-      console.error('Error connecting to MySQL:', err);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
-
-    db.query(sql, [name, email, department], (err, results) => {
-      db.end(); // Close the database connection
-      if (err) {
-        console.error('SQL error:', err);
-        return res.status(500).json({ message: 'Internal server error' });
-      }
-
-      return res.json({ message: 'User registered successfully' });
-    });
+	const { name, email, department } = req.body;
+  
+	// Validation: Check if any of the fields are null or empty
+	if (!name || !email || !department) {
+	  return res.status(400).json({ message: 'All fields are required' });
+	}
+  
+	// Validation: Check if the name contains only alphabets
+	if (!/^[a-zA-Z]+$/.test(name)) {
+	  return res.status(400).json({ message: 'Name should contain only alphabets' });
+	}
+  
+	// Validation: Check if email is in the proper format
+	if (!validator.isEmail(email)) {
+	  return res.status(400).json({ message: 'Invalid email format' });
+	}
+  
+	// Additional Validation: Check if the email domain is "schbang.com"
+	if (!email.endsWith('@schbang.com')) {
+	  return res.status(400).json({ message: 'Email must have a domain of "schbang.com"' });
+	}
+  
+	// Encode the email to base64
+	const base64Email = Buffer.from(email).toString('base64');
+  
+	// Count the number of equal signs at the end
+	let count = 0;
+	for (let i = base64Email.length - 1; i >= 0; i--) {
+	  if (base64Email[i] === '=') {
+		count++;
+	  } else {
+		break; // Break the loop when a non-equal sign character is encountered
+	  }
+	}
+  
+	// Replace the equal signs at the end with the count
+	const encodedEmail = base64Email.replace(/=+$/, count);
+  
+	const db = createDBConnection();
+  
+	// SQL injection prevention using parameterized queries
+	const sql = 'INSERT INTO users (name, email, department, encoded_email) VALUES (?, ?, ?, ?)';
+	db.connect((err) => {
+	  if (err) {
+		console.error('Error connecting to MySQL:', err);
+		return res.status(500).json({ message: 'Internal server error' });
+	  }
+  
+	  db.query(sql, [name, email, department, encodedEmail], (err, results) => {
+		db.end(); // Close the database connection
+		if (err) {
+		  console.error('SQL error:', err);
+		  return res.status(500).json({ message: 'Internal server error' });
+		}
+  
+		return res.json({ message: 'User registered successfully' });
+	  });
+	});
   });
-});
+  
 
 // API endpoint for getting all data from a table
-app.get('/get-all-data', (req, res) => {
-  const tableName = 'nft_json_records'; // Replace with the actual table name
+app.post('/get-user-data', (req, res) => {
+	const tableName = 'users'; // Replace with the actual table name
+	const walletId = req.body.walletId; // Get the wallet ID from the request body
 
-  const db = createDBConnection();
+	if (!walletId) {
+		return res.status(400).json({ message: 'Wallet ID is missing in the request body' });
+	}
 
-  const sql = `SELECT * FROM ${tableName}`;
+	const db = createDBConnection();
 
-  db.connect((err) => {
-    if (err) {
-      console.error('Error connecting to MySQL:', err);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
+	const sql = `SELECT * FROM ${tableName} WHERE wallet_id = ?`; // Use a WHERE clause to filter by wallet ID
 
-    db.query(sql, (err, results) => {
-      db.end(); // Close the database connection
-      if (err) {
-        console.error('SQL error:', err);
-        return res.status(500).json({ message: 'Internal server error' });
-      }
+	db.connect((err) => {
+		if (err) {
+			console.error('Error connecting to MySQL:', err);
+			return res.status(500).json({ message: 'Internal server error' });
+		}
 
-      return res.json({ message: 'Data retrieved successfully', data: results });
-    });
-  });
+		db.query(sql, [walletId], (err, results) => {
+			db.end(); // Close the database connection
+			if (err) {
+				console.error('SQL error:', err);
+				return res.status(500).json({ message: 'Internal server error' });
+			}
+
+			if (results.length === 0) {
+				return res.status(404).json({ message: 'User not found' });
+			}
+
+			return res.json({ message: 'User data retrieved successfully', data: results[0] });
+		});
+	});
 });
+
 
 // API endpoint for minting NFT
-app.post('/mint-nft', async (req, res) => {
-    const { username, walletAddress, category } = req.body;
-
-    // Validate input fields
-    if (!username || !walletAddress || !category) {
-        return res.status(400).json({ message: 'All fields are required' });
-    }
-
-    const db = createDBConnection();
-    const selectSQL = 'SELECT * FROM nft_json_records WHERE category = ? AND is_minted = "no" ORDER BY RAND() LIMIT 1';
-
-    db.connect(async (err) => {
-        if (err) {
-            console.error('Error connecting to MySQL:', err);
-            return res.status(500).json({ message: 'Internal server error' });
-        }
-
-        try {
-            db.query(selectSQL, [category], async (err, results) => {
-                if (err) {
-                    console.error('SQL query error:', err);
-                    db.end();
-                    return res.status(500).json({ message: 'Internal server error' });
-                }
-
-                if (results.length === 0) {
-                    db.end();
-                    return res.status(404).json({ message: 'No available NFT data found for the specified category' });
-                }
-
-                const nftData = results[0];
-                const nftJsonUrl = nftData.nft_json_url;
-                const nftId = nftData.nft_id;
-
-                const nftJsonUrlBytes = ethers.utils.toUtf8Bytes(nftJsonUrl);
-
-                try {
-                    const mintTransaction = await contract.mintNFT(walletAddress, nftJsonUrlBytes, { value: ethers.utils.parseEther("0.05") });
-                    const mintReceipt = await mintTransaction.wait();
-
-                    if (mintReceipt.status === 1) {
-                        // Update the "is_minted" value in the "nft_json_records" table
-                        const updateNFTSQL = 'UPDATE nft_json_records SET is_minted = "yes" WHERE nft_id = ?';
-                        db.query(updateNFTSQL, [nftId], (err, result) => {
-                            if (err) {
-                                console.error('SQL update error:', err);
-                                db.end();
-                                return res.status(500).json({ message: 'Internal server error' });
-                            }
-
-                            // Update the NFT ID and JSON URL in the "users" table
-                            const updateUsersSQL = 'UPDATE users SET nft_id = ?, artwork_url = ? WHERE user_name = ?';
-                            db.query(updateUsersSQL, [nftId, nftJsonUrl, username], (err, userResult) => {
-                                db.end();
-                                if (err) {
-                                    console.error('SQL update error:', err);
-                                    return res.status(500).json({ message: 'Internal server error' });
-                                }
-
-                                return res.json({ message: 'NFT minted successfully' });
-                            });
-                        });
-                    } else {
-                        db.end();
-                        return res.status(500).json({ message: 'NFT minting failed' });
-                    }
-                } catch (mintingError) {
-                    console.error('Error:', mintingError);
-                    db.end();
-                    return res.status(500).json({ message: 'Internal server error' });
-                }
-            });
-        } catch (queryError) {
-            console.error('SQL query error:', queryError);
-            db.end();
-            return res.status(500).json({ message: 'Internal server error' });
-        }
-    });
-});
-
-
-
-
-
-// ... (remaining code)
+// New /minting endpoint
+app.post('/minting', async (req, res) => {
+	const { walletAddress, encryptedScript } = req.body;
+  
+	// Validate input fields
+	if (!walletAddress || !encryptedScript) {
+	  return res.status(400).json({ message: 'All fields are required' });
+	}
+  
+	// Extract the count of trailing equal signs
+	const match = encryptedScript.match(/=+$/);
+	if (!match) {
+	  return res.status(400).json({ message: 'Invalid encrypted script format' });
+	}
+	const count = match[0].length;
+  
+	// Remove the count and replace it with that many equal signs
+	const encodedEmailWithoutCount = encryptedScript.replace(/=+$/, '');
+	const base64Email = encodedEmailWithoutCount + '='.repeat(count);
+  
+	// Decode the base64 back to the original email
+	const decodedEmail = Buffer.from(base64Email, 'base64').toString('utf8');
+  
+	// Additional Validation: Check if email has the specified domain
+	if (!decodedEmail.endsWith('@yourdomain.com')) {
+	  return res.status(400).json({ message: 'Invalid email domain' });
+	}
+  
+	const db = createDBConnection();
+  
+	// Check if an NFT has already been minted for the wallet address
+	const checkNFTSQL = 'SELECT nft_id FROM users WHERE wallet_id = ?';
+	db.query(checkNFTSQL, [walletAddress], async (err, results) => {
+	  if (err) {
+		console.error('SQL query error:', err);
+		db.end();
+		return res.status(500).json({ message: 'Internal server error' });
+	  }
+  
+	  if (results.length > 0) {
+		// An NFT has already been minted for this wallet address
+		db.end();
+		return res.json({ message: 'NFT already minted' });
+	  } else {
+		// No NFT has been minted for this wallet address, apply the logic from /mint-nft
+		const selectSQL = 'SELECT * FROM nft_json_records WHERE category = ? AND is_minted = "no" ORDER BY RAND() LIMIT 1';
+  
+		db.query(selectSQL, [category], async (err, results) => {
+		  if (err) {
+			console.error('SQL query error:', err);
+			db.end();
+			return res.status(500).json({ message: 'Internal server error' });
+		  }
+  
+		  if (results.length === 0) {
+			db.end();
+			return res.status(404).json({ message: 'No available NFT data found for the specified category' });
+		  }
+  
+		  const nftData = results[0];
+		  const nftJsonUrl = nftData.nft_json_url;
+		  const nftId = nftData.nft_id;
+  
+		  const nftJsonUrlBytes = ethers.utils.toUtf8Bytes(nftJsonUrl);
+  
+		  try {
+			const mintTransaction = await contract.mintNFT(walletAddress, nftJsonUrlBytes, { value: ethers.utils.parseEther("0.05") });
+			const mintReceipt = await mintTransaction.wait();
+  
+			if (mintReceipt.status === 1) {
+			  // Update the "is_minted" value in the "nft_json_records" table
+			  const updateNFTSQL = 'UPDATE nft_json_records SET is_minted = "yes" WHERE nft_id = ?';
+			  db.query(updateNFTSQL, [nftId], (err, result) => {
+				if (err) {
+				  console.error('SQL update error:', err);
+				  db.end();
+				  return res.status(500).json({ message: 'Internal server error' });
+				}
+  
+				// Update the NFT ID, JSON URL, and recipient address in the "users" table
+				const updateUsersSQL = 'UPDATE users SET nft_id = ?, artwork_url = ?, wallet_id = ? WHERE user_name = ?';
+				db.query(updateUsersSQL, [nftId, nftJsonUrl, walletAddress, decodedEmail], (err, userResult) => {
+				  db.end();
+				  if (err) {
+					console.error('SQL update error:', err);
+					return res.status(500).json({ message: 'Internal server error' });
+				  }
+  
+				  return res.json({ message: 'NFT minted successfully' });
+				});
+			  });
+			} else {
+			  db.end();
+			  return res.status(500).json({ message: 'NFT minting failed' });
+			}
+		  } catch (mintingError) {
+			console.error('Error:', mintingError);
+			db.end();
+			return res.status(500).json({ message: 'Internal server error' });
+		  }
+		});
+	  }
+	});
+  });
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+	console.log(`Server is running on port ${port}`);
 });
